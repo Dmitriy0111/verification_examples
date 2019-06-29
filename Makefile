@@ -9,7 +9,6 @@ help:
 	@true
 
 PWD     := $(shell pwd)
-RUN_DIR  = $(PWD)/run
 RTL_DIR  = $(PWD)/rtl
 TB_DIR   = $(PWD)/tb
 
@@ -30,13 +29,15 @@ sim: sim_gui
 ########################################################
 # simulation - Modelsim
 
-VSIM_DIR = $(PWD)/sim_modelsim
+VSIM_EXAMPLE ?= uart
+
+VSIM_DIR = $(PWD)/$(VSIM_EXAMPLE)/sim_modelsim
 
 VLIB_BIN = cd $(VSIM_DIR) && vlib
 VLOG_BIN = cd $(VSIM_DIR) && vlog
 VSIM_BIN = cd $(VSIM_DIR) && vsim
 
-VSIM_OPT_COMMON += -do $(RUN_DIR)/script_modelsim.tcl -onfinish final
+VSIM_OPT_COMMON += -do $(PWD)/$(VSIM_EXAMPLE)/run/script_modelsim.tcl -onfinish final
 
 VSIM_OPT_CMD     = -c
 VSIM_OPT_CMD    += -onfinish exit
