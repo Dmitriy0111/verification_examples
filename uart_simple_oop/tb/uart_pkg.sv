@@ -20,7 +20,12 @@ package uart_pkg;
         // events
         event               synch[];
 
+        process             env_th;
+
+        event               dis_ev;
+
         integer             cycle = 0;
+        integer             rep_c = -1;
         // interface
         virtual uart_if     uart_if_;
 
@@ -28,6 +33,12 @@ package uart_pkg;
             this.uart_if_ = uart_if_;
         endfunction : new
 
+        virtual task run();
+        endtask : run
+
+        virtual task build( mailbox mbx_i[] = null, event synch_i[] = null, event dis_ev = null );
+        endtask : build
+        
     endclass : uart_btc
 
     /*****************************************************
@@ -126,10 +137,10 @@ package uart_pkg;
         logic   [1  : 0]    stop_sel;
     } uart_cd;  // uart control/data
 
-    `include "uart_generator.sv"
-    `include "uart_driver.sv"
-    `include "uart_monitor.sv"
-    `include "uart_scoreboard.sv"
-    `include "uart_enviroment.sv"
+`include "uart_generator.sv"
+`include "uart_driver.sv"
+`include "uart_monitor.sv"
+`include "uart_scoreboard.sv"
+`include "uart_enviroment.sv"
 
 endpackage : uart_pkg

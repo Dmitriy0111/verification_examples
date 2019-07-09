@@ -12,6 +12,9 @@ module uart_transmitter_tb();
     timeprecision       1ns;
     timeunit            1ns;
 
+    import uvm_pkg::*;
+    `include "uvm_macros.svh"
+
     import uart_pkg::*;
     
     parameter           T = 10,
@@ -37,16 +40,11 @@ module uart_transmitter_tb();
         .uart_tx    ( uart_if_.uart_tx  )   // UART tx wire
     );
 
-    uart_enviroment uart_enviroment_;
-
     // start simulation
     initial
     begin
-        uart_enviroment_ = new(uart_if_);
-        uart_enviroment_.build(10);
-        uart_enviroment_.run(resetn_delay, T);
-        uart_enviroment_.print_info();
-        uart_enviroment_.free_resource();
+        uvm_config_db #(virtual uart_if)::set(null, "*", "uart_if_", uart_if_);
+        run_test();
         $stop();
     end
 

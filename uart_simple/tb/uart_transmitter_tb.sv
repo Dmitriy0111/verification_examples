@@ -140,10 +140,12 @@ module uart_transmitter_tb();
             repeat( comp / 2 )
             begin
                 if( uart_tx == '0 )
-                    $display("[ Error ] Stop bits count error!");
+                    uart_tx_c++;
                 @(posedge clk);
             end
         end
+        if( uart_tx_c > ( comp / 10 ) )
+            $display("[ Error ] Stop bits count error!");
         $display("Received data = 0x%h", uart_rec_d);
     endtask : rec_uart
 

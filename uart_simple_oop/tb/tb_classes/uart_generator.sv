@@ -21,7 +21,7 @@ class uart_generator extends uart_btc;
         this.name = name_i;
     endfunction : new
 
-    task build( mailbox mbx_i[] = null, event synch_i[] = null );
+    task build( mailbox mbx_i[] = null, event synch_i[] = null, event dis_ev = null );
         this.mbx          = new[mbx_i.size()];
         foreach(mbx[i])
             this.mbx[i]   = mbx_i[i];
@@ -29,6 +29,7 @@ class uart_generator extends uart_btc;
         foreach(synch[i])
             this.synch[i] = synch_i[i];
         uart_transactor_.en_real_br;
+        this.dis_ev = dis_ev;
     endtask : build
 
     task print_info();
@@ -56,6 +57,8 @@ class uart_generator extends uart_btc;
             ->synch[1];
             mbx[2].put(uart_cd_);
             ->synch[2];
+            if( ( rep_c != -1 ) && ( cycle == rep_c ) )
+                -> dis_ev;
             @(posedge uart_if_.clk);
         end
     endtask : run

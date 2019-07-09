@@ -25,13 +25,14 @@ class uart_scoreboard extends uart_btc;
         this.name = name_i;
     endfunction : new
 
-    task build( mailbox mbx_i[] = null, event synch_i[] = null );
+    task build( mailbox mbx_i[] = null, event synch_i[] = null, event dis_ev = null );
         this.mbx          = new[mbx_i.size()];
         foreach(mbx[i])
             this.mbx[i]   = mbx_i[i];
         this.synch        = new[synch_i.size()];
         foreach(synch[i])
             this.synch[i] = synch_i[i];
+        this.dis_ev = dis_ev;
     endtask : build
 
     task run();
@@ -66,7 +67,9 @@ class uart_scoreboard extends uart_btc;
             $display("[ Info  ] | %h | %s | test pass\n" , cycle , name );
         else
             $display("[ Error ] | %h | %s | test fail\n" , cycle , name );
-        $stop;
+
+        if( ( rep_c != -1 ) && ( cycle == rep_c ) )
+            -> dis_ev;
         
     endtask : compare_data
 

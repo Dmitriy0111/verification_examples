@@ -21,13 +21,14 @@ class uart_monitor extends uart_btc;
         this.name = name_i;
     endfunction : new
 
-    task build( mailbox mbx_i[] = null, event synch_i[] = null );
+    task build( mailbox mbx_i[] = null, event synch_i[] = null, event dis_ev = null );
         this.mbx          = new[mbx_i.size()];
         foreach(mbx[i])
             this.mbx[i]   = mbx_i[i];
         this.synch        = new[synch_i.size()];
         foreach(synch[i])
             this.synch[i] = synch_i[i];
+        this.dis_ev = dis_ev;
     endtask : build
 
     task print_info();
@@ -54,14 +55,18 @@ class uart_monitor extends uart_btc;
                 repeat( uart_if_.comp / 2 )
                 begin
                     if( uart_if_.uart_tx == '0 )
-                        $display("[ Error ] | %h | %s | Stop bits count error!", cycle, name );
+                        uart_tx_c++;
                     @(posedge uart_if_.clk);
                 end
             end
             cycle++;
+            if( uart_tx_c > ( uart_if_.comp / 10 ) )
+                $display("[ Error ] | %h | %s | Stop bits count error!", cycle, name );
             this.print_info();
             mbx[0].put(uart_cd_);
             ->synch[0];
+            if( ( rep_c != -1 ) && ( cycle == rep_c ) )
+                -> dis_ev;
         end
     endtask : run
 

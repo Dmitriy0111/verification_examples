@@ -19,13 +19,14 @@ class uart_driver extends uart_btc;
         this.name = name_i;
     endfunction : new
 
-    task build( mailbox mbx_i[] = null, event synch_i[] = null );
+    task build( mailbox mbx_i[] = null, event synch_i[] = null, event dis_ev = null );
         this.mbx          = new[mbx_i.size()];
         foreach(mbx[i])
             this.mbx[i]   = mbx_i[i];
         this.synch        = new[synch_i.size()];
         foreach(synch[i])
             this.synch[i] = synch_i[i];
+        this.dis_ev = dis_ev;
     endtask : build
 
     task print_info();
@@ -53,6 +54,8 @@ class uart_driver extends uart_btc;
             @(posedge uart_if_.req_ack);
             uart_if_.req = '0;
             @(posedge uart_if_.clk);
+            if( ( rep_c != -1 ) && ( cycle == rep_c ) )
+                -> dis_ev;
         end
     endtask : run
 
