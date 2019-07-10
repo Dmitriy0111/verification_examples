@@ -108,11 +108,14 @@ import uvm_pkg::*;
         logic   [1  : 0]    stop_sel;
     } uart_cd;  // uart control/data
 
+`include "uart_base_generator.sv"
 `include "uart_generator_rand.sv"
 `include "uart_generator_direct.sv"
+`include "clk_rst_generator.sv"
 `include "uart_driver.sv"
 `include "uart_monitor.sv"
 `include "uart_scoreboard.sv"
+`include "uart_enviroment.sv"
 `include "uart_test_rand.sv"
 `include "uart_test_direct.sv"
 
