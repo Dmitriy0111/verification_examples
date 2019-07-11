@@ -20,6 +20,7 @@ class uart_test_rand extends uvm_test;
     uart_driver             uart_driver_;
     uart_monitor            uart_monitor_;
     uart_scoreboard         uart_scoreboard_;
+    uart_coverage           uart_coverage_;
 
     uvm_tlm_fifo #(uart_cd) uart_gen2drv;
     uvm_tlm_fifo #(uart_cd) uart_gen2scb;
@@ -42,6 +43,7 @@ class uart_test_rand extends uvm_test;
         uart_driver_            = new( "[ UART driver     ]" , this );
         uart_monitor_           = new( "[ UART monitor    ]" , this );
         uart_scoreboard_        = new( "[ UART scoreboard ]" , this );
+        uart_coverage_          = new( "[ UART coverage   ]" , this );
 
     endfunction : build_phase
 

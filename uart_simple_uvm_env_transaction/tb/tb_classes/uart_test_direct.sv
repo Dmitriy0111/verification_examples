@@ -1,5 +1,5 @@
 /*
-*  File            :   uart_test_rand.sv
+*  File            :   uart_test_direct.sv
 *  Autor           :   Vlasov D.V.
 *  Data            :   2019.07.09
 *  Language        :   SystemVerilog
@@ -10,8 +10,8 @@
 import uart_pkg::*;
 
 // class uart enviroment
-class uart_test_rand extends uvm_test;
-    `uvm_component_utils(uart_test_rand);
+class uart_test_direct extends uvm_test;
+    `uvm_component_utils(uart_test_direct);
 
     uart_enviroment       uart_enviroment_;
 
@@ -20,8 +20,8 @@ class uart_test_rand extends uvm_test;
     endfunction : new
 
     function void build_phase(uvm_phase phase);
-        uart_base_generator::type_id::set_type_override(uart_generator_rand::get_type());
+        uart_base_generator::type_id::set_type_override(uart_generator_direct::get_type());
         uart_enviroment_ = uart_enviroment::type_id::create("uart_enviroment_",this);
     endfunction : build_phase
 
-endclass : uart_test_rand
+endclass : uart_test_direct

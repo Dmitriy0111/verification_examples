@@ -1,0 +1,12 @@
++incdir+../rtl
+../rtl/*.*v
++incdir+../rtl/ahb
+../rtl/ahb/*.*v
++incdir+../rtl/periphery
+../rtl/periphery/*.*v
++incdir+../rtl/periphery/uart
+../rtl/periphery/uart/*.*v
++incdir+../rtl/periphery/pwm
+../rtl/periphery/pwm/*.*v
++incdir+../rtl/periphery/gpio
+../rtl/periphery/gpio/*.*v

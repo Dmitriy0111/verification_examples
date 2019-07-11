@@ -113,6 +113,7 @@ import uvm_pkg::*;
 `include "uart_driver.sv"
 `include "uart_monitor.sv"
 `include "uart_scoreboard.sv"
+`include "uart_coverage.sv"
 `include "uart_test_rand.sv"
 `include "uart_test_direct.sv"
 

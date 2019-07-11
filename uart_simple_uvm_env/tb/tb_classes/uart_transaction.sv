@@ -1,17 +1,85 @@
 /*
-*  File            :   uart_generator_rand.sv
+*  File            :   uart_transaction.sv
 *  Autor           :   Vlasov D.V.
 *  Data            :   2019.07.09
 *  Language        :   SystemVerilog
-*  Description     :   This is uart generator class for uart transmitter unit (with random)
+*  Description     :   This is uart transaction class for uart transmitter unit
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
 import uart_pkg::*;
 
 // class uart generator
-class uart_generator_rand extends uart_base_generator;
-    `uvm_component_utils(uart_generator_rand)
+class uart_transaction extends uvm_transaction;
+    `uvm_component_utils(uart_transaction)
+
+    class uart_transactor;
+
+        rand    logic   [7  : 0]    tx_data;
+        rand    logic   [15 : 0]    comp;
+        rand    logic   [1  : 0]    stop_sel;
+        rand    integer             baudrate;
+        rand    logic   [0  : 0]    real_br;
+
+        integer                     work_freq;
+        integer                     baudrate_l[5] = { 9600 , 19200 , 38400 , 57600 , 115200 };
+
+        constraint tx_data_c
+        {
+            tx_data inside {[0 : 255]};
+        }
+
+        constraint stop_sel_c
+        {
+            stop_sel inside {[0 : 3]};
+        }
+
+        constraint real_br_on_c
+        {
+            real_br == '1;
+        }
+
+        constraint real_br_off_c
+        {
+            real_br == '0;
+        }
+
+        constraint comp_c
+        {
+            if( real_br == '1 )
+                comp == work_freq / baudrate;
+            else
+                comp inside{ [6 : 65530] };
+        }
+
+        constraint baudrate_c
+        {
+            baudrate inside{ baudrate_l };
+        }
+
+        task edit_work_freq(integer new_work_freq);
+            work_freq = new_work_freq;
+        endtask : edit_work_freq
+        // enable real baudrate
+        task en_real_br();
+            this.real_br_off_c.constraint_mode(0);
+            this.real_br_on_c.constraint_mode(1);
+        endtask : en_real_br
+        // disable real baudrate
+        task dis_real_br();
+            this.real_br_off_c.constraint_mode(1);
+            this.real_br_on_c.constraint_mode(0);
+        endtask : dis_real_br
+        // make random transaction
+        task rand_make();
+            assert(this.randomize()) else $display("[Error] Generation random transaction failed!" );
+            uart_transactor_cg.sample;
+        endtask : rand_make
+
+        function new(integer work_freq_i, string name_i = "" );
+            this.work_freq = work_freq_i;
+            uart_transactor_cg = new;
+        endfunction : new
 
     function new (string name, uvm_component parent);
         super.new(name, parent);
@@ -58,4 +126,4 @@ class uart_generator_rand extends uart_base_generator;
 
     endfunction : get_data
 
-endclass : uart_generator_rand
+endclass : uart_transaction
