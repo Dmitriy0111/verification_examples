@@ -3,7 +3,7 @@
 *  Autor           :   Vlasov D.V.
 *  Data            :   2019.07.11
 *  Language        :   SystemVerilog
-*  Description     :   This is simple testbench for AHB
+*  Description     :   This is simple testbench for AHB master ( with simple interface ) to AHB slaves
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
@@ -20,15 +20,30 @@ module ahb_tb();
     parameter           T = 10,
                         resetn_delay = 7,
                         repeat_cycles = 400,
-                        work_freq = 500000000;
+                        work_freq = 500000000,
+                        test_c = 20;
 
     parameter           slave_c = SLAVE_COUNT,
                         gpio_w = 8,
                         pwm_width = 8;
 
-    integer             cycle = 0;
-    event               uart_send_e_0;
-    event               uart_send_e_1;
+    integer                     cycle = 0;
+
+    logic   [gpio_w-1 : 0]      gpo_0_v;
+    logic   [gpio_w-1 : 0]      gpd_0_v;
+    logic   [gpio_w-1 : 0]      gpo_1_v;
+    logic   [gpio_w-1 : 0]      gpd_1_v;
+
+    logic   [7 : 0]             uart_write_v;
+
+    event                       uart_send_e_0;
+    event                       uart_send_e_1;
+    logic   [7 : 0]             send_uart_v;
+
+    event                       pwm_e_0;
+    event                       pwm_e_1;
+    logic   [pwm_width-1 : 0]   pwm_D_rand;
+    real                        pwm_D_rand_r;
 
     // clock and reset
     logic                  [0         : 0]  clk;        // clk
@@ -71,33 +86,32 @@ module ahb_tb();
 
     ahb_top 
     #(
-        .slave_c    ( slave_c       )
+        .slave_c        ( slave_c       )
     )
     ahb_top_0
     (
-        .clk            ( clk           ),  // clk
-        .resetn         ( resetn        ),  // resetn
+        .clk            ( clk           ),      // clk
+        .resetn         ( resetn        ),      // resetn
         // AHB slaves side
-        .haddr_s        ( haddr_s       ),  // AHB - Slave HADDR 
-        .hwdata_s       ( hwdata_s      ),  // AHB - Slave HWDATA 
-        .hrdata_s       ( hrdata_s      ),  // AHB - Slave HRDATA 
-        .hwrite_s       ( hwrite_s      ),  // AHB - Slave HWRITE 
-        .htrans_s       ( htrans_s      ),  // AHB - Slave HTRANS 
-        .hsize_s        ( hsize_s       ),  // AHB - Slave HSIZE 
-        .hburst_s       ( hburst_s      ),  // AHB - Slave HBURST 
-        .hresp_s        ( hresp_s       ),  // AHB - Slave HRESP 
-        .hready_s       ( hready_s      ),  // AHB - Slave HREADYOUT 
-        .hsel_s         ( hsel_s        ),  // AHB - Slave HSEL
+        .haddr_s        ( haddr_s       ),      // AHB - Slave HADDR 
+        .hwdata_s       ( hwdata_s      ),      // AHB - Slave HWDATA 
+        .hrdata_s       ( hrdata_s      ),      // AHB - Slave HRDATA 
+        .hwrite_s       ( hwrite_s      ),      // AHB - Slave HWRITE 
+        .htrans_s       ( htrans_s      ),      // AHB - Slave HTRANS 
+        .hsize_s        ( hsize_s       ),      // AHB - Slave HSIZE 
+        .hburst_s       ( hburst_s      ),      // AHB - Slave HBURST 
+        .hresp_s        ( hresp_s       ),      // AHB - Slave HRESP 
+        .hready_s       ( hready_s      ),      // AHB - Slave HREADYOUT 
+        .hsel_s         ( hsel_s        ),      // AHB - Slave HSEL
         // core side
-        .addr           ( addr          ),  // address memory
-        .rd             ( rd            ),  // read memory
-        .wd             ( wd            ),  // write memory
-        .we             ( we            ),  // write enable signal
-        .size           ( size          ),  // size for load/store instructions
-        .req            ( req           ),  // request memory signal
-        .req_ack        ( req_ack       )   // request acknowledge memory signal
+        .addr           ( addr          ),      // address memory
+        .rd             ( rd            ),      // read memory
+        .wd             ( wd            ),      // write memory
+        .we             ( we            ),      // write enable signal
+        .size           ( size          ),      // size for load/store instructions
+        .req            ( req           ),      // request memory signal
+        .req_ack        ( req_ack       )       // request acknowledge memory signal
     );
-
     // Creating one ahb_gpio_0
     ahb_gpio 
     #(
@@ -124,7 +138,6 @@ module ahb_tb();
         .gpo            ( gpo_0         ),      // GPIO output
         .gpd            ( gpd_0         )       // GPIO direction
     );
-
     // Creating one ahb_gpio_1
     ahb_gpio 
     #(
@@ -151,11 +164,10 @@ module ahb_tb();
         .gpo            ( gpo_1         ),      // GPIO output
         .gpd            ( gpd_1         )       // GPIO direction
     );
-
     // creating AHB PWM module
     ahb_pwm
     #(
-        .pwm_width      ( 8             )
+        .pwm_width      ( pwm_width     )
     )
     ahb_pwm_0
     (
@@ -178,7 +190,6 @@ module ahb_tb();
         .pwm_resetn     ( pwm_resetn    ),      // PWM_resetn
         .pwm            ( pwm           )       // PWM output signal
     );
-
     // Creating one ahb_gpio_0
     ahb_uart 
     ahb_uart_0
@@ -231,23 +242,56 @@ module ahb_tb();
         uart_rx = '1;
         @(posedge resetn);
         $display("Testing gpio_0");
-        repeat(20)
-            write_data( GPIO_0_ADDR_S | GPIO_GPO_R , $urandom_range(0,255) );
-        repeat(20)
-            write_data( GPIO_0_ADDR_S | GPIO_GPD_R , $urandom_range(0,255) );
+        repeat(test_c)
+        begin
+            gpo_0_v = $urandom_range(0,255);
+            write_data( GPIO_0_ADDR_S | GPIO_GPO_R , gpo_0_v , '0 );
+            @(posedge clk);
+            $display("Test %s, gpo_0 = 0x%h, wd = 0x%h", ( gpo_0 == wd ) ? "Pass" : "Fail" , gpo_0, wd);
+        end
+        repeat(test_c)
+        begin
+            gpd_0_v = $urandom_range(0,255);
+            write_data( GPIO_0_ADDR_S | GPIO_GPD_R , gpd_0_v , '0 );
+            @(posedge clk);
+            $display("Test %s, gpd_0 = 0x%h, wd = 0x%h", ( gpd_0 == wd ) ? "Pass" : "Fail" , gpd_0, wd);
+        end
+        repeat(test_c)
+        begin
+            gpi_0 = $urandom_range(0, 2**gpio_w-1);
+            read_data( GPIO_0_ADDR_S | GPIO_GPI_R );
+            $display("Test %s, gpi_0 = 0x%h, rd = 0x%h", ( gpi_0 == rd ) ? "Pass" : "Fail" , gpi_0, rd);
+        end
         $display("Testing gpio_1");
-        repeat(20)
-            write_data( GPIO_1_ADDR_S | GPIO_GPD_R , $urandom_range(0,255) );
-        repeat(20)
-            write_data( GPIO_1_ADDR_S | GPIO_GPO_R , $urandom_range(0,255) );
+        repeat(test_c)
+        begin
+            gpo_1_v = $urandom_range(0,255);
+            write_data( GPIO_1_ADDR_S | GPIO_GPO_R , gpo_1_v , '0 );
+            @(posedge clk);
+            $display("Test %s, gpo_1 = 0x%h, wd = 0x%h", ( gpo_1 == wd ) ? "Pass" : "Fail" , gpo_1, wd);
+        end
+        repeat(test_c)
+        begin
+            gpd_1_v = $urandom_range(0,255);
+            write_data( GPIO_1_ADDR_S | GPIO_GPD_R , gpd_1_v , '0 );
+            @(posedge clk);
+            $display("Test %s, gpd_1 = 0x%h, wd = 0x%h", ( gpd_1 == wd ) ? "Pass" : "Fail" , gpd_1, wd);
+        end
+        repeat(test_c)
+        begin
+            gpi_1 = $urandom_range(0, 2**gpio_w-1);
+            read_data( GPIO_1_ADDR_S | GPIO_GPI_R );
+            $display("Test %s, gpi_1 = 0x%h, rd = 0x%h", ( gpi_1 == rd ) ? "Pass" : "Fail" , gpi_1, rd);
+        end
         $display("Testing uart_0");
         $display("Start work with uart transmitter");
-        repeat(20)
+        repeat(test_c)
         begin
             $display("Start cycle = %d", cycle);
             write_data( UART_ADDR_S | UART_CR_R , 1'b1 << UART_TX_EN );
             write_data( UART_ADDR_S | UART_DR_R , work_freq / 115200 );
-            write_data( UART_ADDR_S | UART_TX_R , $urandom_range(0,255) );
+            uart_write_v = $urandom_range(0,255);
+            write_data( UART_ADDR_S | UART_TX_R , uart_write_v );
             write_data( UART_ADDR_S | UART_CR_R , ( 1'b1 << UART_TX_EN ) | ( 1'b1 << UART_TX_REQ ) );
             do
             begin
@@ -259,7 +303,7 @@ module ahb_tb();
         cycle = 0;
         $display("Start work with uart receiver");
         write_data( UART_ADDR_S | UART_CR_R , 1'b1 << UART_RX_EN );
-        repeat(20)
+        repeat(test_c)
         begin
             -> uart_send_e_0;
             $display("Start cycle = %d", cycle);
@@ -270,9 +314,20 @@ module ahb_tb();
             while( ( rd & ( 1'b1 << UART_RX_VAL ) ) == '0 );
             read_data( UART_ADDR_S | UART_RX_R );
             $display("read data = 0x%h", rd);
+            $display("Test %s", send_uart_v == rd ? "Pass" : "Fail" );
             write_data( UART_ADDR_S | UART_CR_R , 1'b1 << UART_RX_EN );
             cycle++;
             wait(uart_send_e_1.triggered);
+        end
+        $display("Testing pwm_0");
+        repeat(test_c)
+        begin
+            -> pwm_e_1;
+            pwm_D_rand = $urandom_range(0,2**pwm_width-1);
+            write_data( PWM_ADDR_S | PWM_C_R , pwm_D_rand );
+            pwm_D_rand_r = ( pwm_D_rand ) * 100.0 / (2**pwm_width-1);
+            @(posedge clk);
+            wait(pwm_e_0.triggered);
         end
         repeat(10) @(posedge clk);
         $stop;
@@ -280,10 +335,11 @@ module ahb_tb();
 
     initial
     begin
-        repeat(20)
+        repeat(test_c)
         begin
             wait(uart_send_e_0.triggered);
-            send_uart($urandom_range(0,255));
+            send_uart_v = $urandom_range(0,255);
+            send_uart(send_uart_v);
             -> uart_send_e_1;
         end
     end
@@ -292,6 +348,17 @@ module ahb_tb();
     begin
         forever
             rec_uart();
+    end
+
+    initial
+    begin
+        @(posedge pwm_resetn);
+        repeat(test_c)
+        begin
+            wait(pwm_e_1.triggered);
+            pwm_dc_find();
+            -> pwm_e_0;
+        end
     end
 
     task write_data(logic [31 : 0] w_addr, logic [31 : 0] w_data, bit disp = '1 );
@@ -303,6 +370,7 @@ module ahb_tb();
         size = 2'b10;
         req = '1;
         @(posedge req_ack);
+        @(posedge clk);
         req = '0;
         @(posedge clk);
     endtask : write_data
@@ -342,6 +410,7 @@ module ahb_tb();
         if( uart_tx_c > ( ahb_uart_0.uart_top_0.UDVR_0 / 10 ) )
             $display("[ Error ] Stop bits count error!");
         $display("Received data = 0x%h", uart_rec_d);
+        $display("Test %s", uart_write_v == uart_rec_d ? "Pass" : "Fail" );
         uart_tx_c = '0;
     endtask : rec_uart
 
@@ -359,5 +428,29 @@ module ahb_tb();
         uart_rx = '1;
         repeat( ahb_uart_0.uart_top_0.UDVR_0 ) @(posedge clk);
     endtask : send_uart
+
+    task pwm_dc_find();
+        integer count;
+        real pwm_D;
+        count = 0;
+        //repeat(2**pwm_width) @(posedge clk);
+        repeat(2**pwm_width)
+        begin
+            @(posedge pwm_clk);
+            count += pwm;
+        end
+        pwm_D = count * 100.0 / (2**pwm_width-1);
+        $display("Test %s, pwm_D_rand = %2.2f%%, pwm_D = %2.2f%%", abs_r( pwm_D - pwm_D_rand_r ) < 1.0 ? "Pass" : "Fail", pwm_D_rand_r , pwm_D );
+        count = 0;
+    endtask : pwm_dc_find
+
+    function real abs_r(real data);
+        real ret_v;
+        if( data < 0 )
+            ret_v = - data;
+        else
+            ret_v = data;
+        return ret_v;
+    endfunction : abs_r
 
 endmodule : ahb_tb

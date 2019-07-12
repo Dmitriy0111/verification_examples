@@ -34,7 +34,7 @@ module pwm
     // assign write enable signals
     assign pwm_c_we = we && ( addr[0 +: 4] == PWM_C_R ); 
 
-    assign pwm = ( pwm_i >= pwm_c );
+    assign pwm = ( pwm_i < pwm_c );
     assign rd  = { '0 , pwm_c };
 
     always_ff @(posedge pwm_clk, negedge pwm_resetn)
