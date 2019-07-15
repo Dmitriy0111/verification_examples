@@ -230,6 +230,7 @@ module ahb_tb();
         repeat( resetn_delay ) @(posedge clk);
         resetn = '1;
     end
+    // verification
     initial
     begin
         wd = '0;
@@ -332,7 +333,7 @@ module ahb_tb();
         repeat(10) @(posedge clk);
         $stop;
     end
-
+    // 
     initial
     begin
         repeat(test_c)
@@ -343,13 +344,13 @@ module ahb_tb();
             -> uart_send_e_1;
         end
     end
-
+    // receiving uart data
     initial
     begin
         forever
             rec_uart();
     end
-
+    // working with pwm
     initial
     begin
         @(posedge pwm_resetn);
@@ -360,7 +361,7 @@ module ahb_tb();
             -> pwm_e_0;
         end
     end
-
+    // task for writing data with simple interface
     task write_data(logic [31 : 0] w_addr, logic [31 : 0] w_data, bit disp = '1 );
         if(disp)
             $display("Write data 0x%h at addr 0x%h", w_data, w_addr );
@@ -374,7 +375,7 @@ module ahb_tb();
         req = '0;
         @(posedge clk);
     endtask : write_data
-
+    // task for reading data with simple interface
     task read_data(logic [31 : 0] r_addr);
         addr = r_addr;
         we = '0;
@@ -383,7 +384,6 @@ module ahb_tb();
         req = '0;
         @(posedge clk);
     endtask : read_data
-
     // task for receiving data over uart
     task rec_uart();
         integer             uart_tx_c;
@@ -413,7 +413,6 @@ module ahb_tb();
         $display("Test %s", uart_write_v == uart_rec_d ? "Pass" : "Fail" );
         uart_tx_c = '0;
     endtask : rec_uart
-
     // task for sending data over uart
     task send_uart(logic [7 : 0] symbol);
         $display("Sending uart data = 0x%h", symbol);
@@ -428,12 +427,11 @@ module ahb_tb();
         uart_rx = '1;
         repeat( ahb_uart_0.uart_top_0.UDVR_0 ) @(posedge clk);
     endtask : send_uart
-
+    // task for finding pwm duty cycle
     task pwm_dc_find();
         integer count;
         real pwm_D;
         count = 0;
-        //repeat(2**pwm_width) @(posedge clk);
         repeat(2**pwm_width)
         begin
             @(posedge pwm_clk);
@@ -441,9 +439,8 @@ module ahb_tb();
         end
         pwm_D = count * 100.0 / (2**pwm_width-1);
         $display("Test %s, pwm_D_rand = %2.2f%%, pwm_D = %2.2f%%", abs_r( pwm_D - pwm_D_rand_r ) < 1.0 ? "Pass" : "Fail", pwm_D_rand_r , pwm_D );
-        count = 0;
     endtask : pwm_dc_find
-
+    // 
     function real abs_r(real data);
         real ret_v;
         if( data < 0 )
