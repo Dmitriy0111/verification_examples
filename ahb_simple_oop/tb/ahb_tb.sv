@@ -98,7 +98,11 @@ module ahb_tb();
     timeprecision       1ns;
     timeunit            1ns;
 
+    import uvm_pkg::*;
+    `include "uvm_macros.svh"
+
     import test_pkg::*;
+
     // testbench settigns
     parameter           T = 10,
                         resetn_delay = 7,
@@ -110,24 +114,6 @@ module ahb_tb();
                         gpio_w = 8,
                         pwm_width = 8;
 
-    integer                     cycle = 0;
-
-    logic   [gpio_w-1 : 0]      gpo_0_v;
-    logic   [gpio_w-1 : 0]      gpd_0_v;
-    logic   [gpio_w-1 : 0]      gpo_1_v;
-    logic   [gpio_w-1 : 0]      gpd_1_v;
-
-    logic   [7 : 0]             uart_write_v;
-
-    event                       uart_send_e_0;
-    event                       uart_send_e_1;
-    logic   [7 : 0]             send_uart_v;
-
-    event                       pwm_e_0;
-    event                       pwm_e_1;
-    logic   [pwm_width-1 : 0]   pwm_D_rand;
-    real                        pwm_D_rand_r;
-
     ahb_if      #(slave_c)      ahb_ic_0();
 
     simple_if                   s_if_0();
@@ -136,12 +122,6 @@ module ahb_tb();
     gpio_if     #(gpio_w)       gpio_if_1();
     pwm_if                      pwm_if_0();
     uart_if                     uart_if_0();
-
-    c_r_generator   #(T, resetn_delay)  c_r_generator_0 = new("[ C_R_0  generator ]");
-    uart_monitor                        uart_monitor_0  = new("[ UART_0 monitor   ]");
-    gpio_monitor                        gpio_monitor_0  = new("[ GPIO_0 monitor   ]");
-    gpio_monitor                        gpio_monitor_1  = new("[ GPIO_1 monitor   ]");
-    pwm_monitor                         pwm_monitor_0   = new("[ UART_0 monitor   ]");
 
     ahb_top 
     #(
@@ -286,235 +266,16 @@ module ahb_tb();
     assign gpio_if_1.clk            = s_if_0.clk;
     assign gpio_if_1.resetn         = s_if_0.resetn;
 
+    // start simulation
     initial
     begin
-        fork
-            c_r_generator_0.build_phase(s_if_0);
-            gpio_monitor_0.build_phase(gpio_if_0);
-            gpio_monitor_1.build_phase(gpio_if_1);
-            uart_monitor_0.build_phase(uart_if_0);
-            pwm_monitor_0.build_phase(pwm_if_0);
-        join
-        c_r_generator_0.run_phase();
+        uvm_config_db #( virtual simple_if )::set(null, "*", "s_if_0"    , s_if_0    );
+        uvm_config_db #( virtual gpio_if   )::set(null, "*", "gpio_if_0" , gpio_if_0 );
+        uvm_config_db #( virtual gpio_if   )::set(null, "*", "gpio_if_1" , gpio_if_1 );
+        uvm_config_db #( virtual pwm_if    )::set(null, "*", "pwm_if_0"  , pwm_if_0  );
+        uvm_config_db #( virtual uart_if   )::set(null, "*", "uart_if_0" , uart_if_0 );
+        run_test();
+        $stop();
     end
-    // verification
-    initial
-    begin
-        s_if_0.wd = '0;
-        s_if_0.we = '0;
-        s_if_0.req = '0;
-        s_if_0.addr = '0;
-        s_if_0.size = '0;
-        gpio_if_0.gpi = '0;
-        gpio_if_1.gpi = '0;
-        uart_if_0.uart_rx = '1;
-        @(posedge s_if_0.resetn);
-        $display("Testing gpio_0");
-        repeat(test_c)
-        begin
-            gpo_0_v = $urandom_range(0,255);
-            write_data( GPIO_0_ADDR_S | GPIO_GPO_R , gpo_0_v , '0 );
-            @(posedge s_if_0.clk);
-            $display("Test %s, gpo_0 = 0x%h, wd = 0x%h", ( gpio_if_0.gpo == s_if_0.wd ) ? "Pass" : "Fail" , gpio_if_0.gpo, s_if_0.wd);
-        end
-        repeat(test_c)
-        begin
-            gpd_0_v = $urandom_range(0,255);
-            write_data( GPIO_0_ADDR_S | GPIO_GPD_R , gpd_0_v , '0 );
-            @(posedge s_if_0.clk);
-            $display("Test %s, gpd_0 = 0x%h, wd = 0x%h", ( gpio_if_0.gpd == s_if_0.wd ) ? "Pass" : "Fail" , gpio_if_0.gpd, s_if_0.wd);
-        end
-        repeat(test_c)
-        begin
-            gpio_if_0.gpi = $urandom_range(0, 2**gpio_w-1);
-            read_data( GPIO_0_ADDR_S | GPIO_GPI_R );
-            $display("Test %s, gpi_0 = 0x%h, rd = 0x%h", ( gpio_if_0.gpi == s_if_0.rd ) ? "Pass" : "Fail" , gpio_if_0.gpi, s_if_0.rd);
-        end
-        $display("Testing gpio_1");
-        repeat(test_c)
-        begin
-            gpo_1_v = $urandom_range(0,255);
-            write_data( GPIO_1_ADDR_S | GPIO_GPO_R , gpo_1_v , '0 );
-            @(posedge s_if_0.clk);
-            $display("Test %s, gpo_1 = 0x%h, wd = 0x%h", ( gpio_if_1.gpo == s_if_0.wd ) ? "Pass" : "Fail" , gpio_if_1.gpo, s_if_0.wd);
-        end
-        repeat(test_c)
-        begin
-            gpd_1_v = $urandom_range(0,255);
-            write_data( GPIO_1_ADDR_S | GPIO_GPD_R , gpd_1_v , '0 );
-            @(posedge s_if_0.clk);
-            $display("Test %s, gpd_1 = 0x%h, wd = 0x%h", ( gpio_if_1.gpd == s_if_0.wd ) ? "Pass" : "Fail" , gpio_if_1.gpd, s_if_0.wd);
-        end
-        repeat(test_c)
-        begin
-            gpio_if_0.gpi = $urandom_range(0, 2**gpio_w-1);
-            read_data( GPIO_1_ADDR_S | GPIO_GPI_R );
-            $display("Test %s, gpi_1 = 0x%h, rd = 0x%h", ( gpio_if_1.gpi == s_if_0.rd ) ? "Pass" : "Fail" , gpio_if_1.gpi, s_if_0.rd);
-        end
-        $display("Testing uart_0");
-        $display("Start work with uart transmitter");
-        repeat(test_c)
-        begin
-            $display("Start cycle = %d", cycle);
-            write_data( UART_ADDR_S | UART_CR_R , 1'b1 << UART_TX_EN );
-            write_data( UART_ADDR_S | UART_DR_R , work_freq / 115200 );
-            uart_write_v = $urandom_range(0,255);
-            write_data( UART_ADDR_S | UART_TX_R , uart_write_v );
-            write_data( UART_ADDR_S | UART_CR_R , ( 1'b1 << UART_TX_EN ) | ( 1'b1 << UART_TX_REQ ) );
-            do
-            begin
-                read_data( UART_ADDR_S | UART_CR_R );
-            end
-            while( ( s_if_0.rd & ( 1'b1 << UART_TX_REQ ) ) != '0 );
-            cycle++;
-        end
-        cycle = 0;
-        $display("Start work with uart receiver");
-        write_data( UART_ADDR_S | UART_CR_R , 1'b1 << UART_RX_EN );
-        repeat(test_c)
-        begin
-            -> uart_send_e_0;
-            $display("Start cycle = %d", cycle);
-            do
-            begin
-                read_data( UART_ADDR_S | UART_CR_R );
-            end
-            while( ( s_if_0.rd & ( 1'b1 << UART_RX_VAL ) ) == '0 );
-            read_data( UART_ADDR_S | UART_RX_R );
-            $display("read data = 0x%h", s_if_0.rd);
-            $display("Test %s", send_uart_v == s_if_0.rd ? "Pass" : "Fail" );
-            write_data( UART_ADDR_S | UART_CR_R , 1'b1 << UART_RX_EN );
-            cycle++;
-            wait(uart_send_e_1.triggered);
-        end
-        $display("Testing pwm_0");
-        repeat(test_c)
-        begin
-            -> pwm_e_1;
-            pwm_D_rand = $urandom_range(0,2**pwm_width-1);
-            write_data( PWM_ADDR_S | PWM_C_R , pwm_D_rand );
-            pwm_D_rand_r = ( pwm_D_rand ) * 100.0 / (2**pwm_width-1);
-            @(posedge s_if_0.clk);
-            wait(pwm_e_0.triggered);
-        end
-        repeat(10) @(posedge s_if_0.clk);
-        $stop;
-    end
-    // 
-    initial
-    begin
-        repeat(test_c)
-        begin
-            wait(uart_send_e_0.triggered);
-            send_uart_v = $urandom_range(0,255);
-            send_uart(send_uart_v);
-            -> uart_send_e_1;
-        end
-    end
-    // receiving uart data
-    initial
-    begin
-        forever
-            rec_uart();
-    end
-    // working with pwm
-    initial
-    begin
-        @(posedge pwm_if_0.resetn);
-        repeat(test_c)
-        begin
-            wait(pwm_e_1.triggered);
-            pwm_dc_find();
-            -> pwm_e_0;
-        end
-    end
-    // task for writing data with simple interface
-    task write_data(logic [31 : 0] w_addr, logic [31 : 0] w_data, bit disp = '1 );
-        if(disp)
-            $display("Write data 0x%h at addr 0x%h", w_data, w_addr );
-        s_if_0.addr = w_addr;
-        s_if_0.wd = w_data;
-        s_if_0.we = '1;
-        s_if_0.size = 2'b10;
-        s_if_0.req = '1;
-        @(posedge s_if_0.req_ack);
-        @(posedge s_if_0.clk);
-        s_if_0.req = '0;
-        @(posedge s_if_0.clk);
-    endtask : write_data
-    // task for reading data with simple interface
-    task read_data(logic [31 : 0] r_addr);
-        s_if_0.addr = r_addr;
-        s_if_0.we = '0;
-        s_if_0.req = '1;
-        @(posedge s_if_0.req_ack);
-        s_if_0.req = '0;
-        @(posedge s_if_0.clk);
-    endtask : read_data
-    // task for receiving data over uart
-    task rec_uart();
-        integer             uart_tx_c;
-        logic   [7 : 0]     uart_rec_d;
-        uart_tx_c = 0;
-        @(negedge ahb_uart_0.uart_top_0.uart_tx);
-        repeat(ahb_uart_0.uart_top_0.UDVR_0) @(posedge s_if_0.clk);    // start
-        repeat(8)                       // data
-        begin
-            repeat(ahb_uart_0.uart_top_0.UDVR_0)
-            begin
-                uart_tx_c += ahb_uart_0.uart_top_0.uart_tx;
-                @(posedge s_if_0.clk);
-            end
-            uart_rec_d = { ( uart_tx_c > ( ahb_uart_0.uart_top_0.UDVR_0 >> 1 ) ) , uart_rec_d[7 : 1] };
-            uart_tx_c = '0;
-        end
-        repeat( ahb_uart_0.uart_top_0.UDVR_0 )
-        begin
-            if( ahb_uart_0.uart_top_0.uart_tx == '0 )
-                uart_tx_c++;
-            @(posedge s_if_0.clk);
-        end
-        if( uart_tx_c > ( ahb_uart_0.uart_top_0.UDVR_0 / 10 ) )
-            $display("[ Error ] Stop bits count error!");
-        $display("Received data = 0x%h", uart_rec_d);
-        $display("Test %s", uart_write_v == uart_rec_d ? "Pass" : "Fail" );
-        uart_tx_c = '0;
-    endtask : rec_uart
-    // task for sending data over uart
-    task send_uart(logic [7 : 0] symbol);
-        $display("Sending uart data = 0x%h", symbol);
-        uart_if_0.uart_rx = '0;
-        repeat(ahb_uart_0.uart_top_0.UDVR_0) @(posedge s_if_0.clk);    // start
-        repeat(8)                       // data
-        begin
-            uart_if_0.uart_rx = symbol[0];
-            symbol = symbol>>1;
-            repeat(ahb_uart_0.uart_top_0.UDVR_0) @(posedge s_if_0.clk);
-        end
-        uart_if_0.uart_rx = '1;
-        repeat( ahb_uart_0.uart_top_0.UDVR_0 ) @(posedge s_if_0.clk);
-    endtask : send_uart
-    // task for finding pwm duty cycle
-    task pwm_dc_find();
-        integer count;
-        real pwm_D;
-        count = 0;
-        repeat(2**pwm_width)
-        begin
-            @(posedge pwm_if_0.clk);
-            count += pwm_if_0.pwm;
-        end
-        pwm_D = count * 100.0 / (2**pwm_width-1);
-        $display("Test %s, pwm_D_rand = %2.2f%%, pwm_D = %2.2f%%", abs_r( pwm_D - pwm_D_rand_r ) < 1.0 ? "Pass" : "Fail", pwm_D_rand_r , pwm_D );
-    endtask : pwm_dc_find
-    // 
-    function real abs_r(real data);
-        real ret_v;
-        if( data < 0 )
-            ret_v = - data;
-        else
-            ret_v = data;
-        return ret_v;
-    endfunction : abs_r
 
 endmodule : ahb_tb

@@ -1,5 +1,5 @@
 /*
-*  File            :   gpio_monitor.sv
+*  File            :   gpio_driver.sv
 *  Autor           :   Vlasov D.V.
 *  Data            :   2019.07.16
 *  Language        :   SystemVerilog
@@ -14,8 +14,8 @@ import uvm_pkg::*;
 
 import test_pkg::*;
 
-class gpio_monitor #(parameter string if_name = "") extends uvm_component;
-    `uvm_component_utils(gpio_monitor)
+class gpio_driver #(parameter string if_name = "") extends uvm_component;
+    `uvm_component_utils(gpio_driver)
 
     virtual gpio_if     gpio_if_;
 
@@ -32,6 +32,7 @@ class gpio_monitor #(parameter string if_name = "") extends uvm_component;
     endfunction : build_phase
 
     task run_phase(uvm_phase phase);
+        gpio_if_.gpi = '0;
     endtask : run_phase
 
-endclass : gpio_monitor
+endclass : gpio_driver

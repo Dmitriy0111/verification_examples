@@ -1,9 +1,9 @@
 /*
-*  File            :   gpio_monitor.sv
+*  File            :   uart_driver.sv
 *  Autor           :   Vlasov D.V.
 *  Data            :   2019.07.16
 *  Language        :   SystemVerilog
-*  Description     :   This is gpio monitor class
+*  Description     :   This is uart driver class
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
@@ -14,10 +14,10 @@ import uvm_pkg::*;
 
 import test_pkg::*;
 
-class gpio_monitor #(parameter string if_name = "") extends uvm_component;
-    `uvm_component_utils(gpio_monitor)
+class uart_driver #(parameter string if_name = "") extends uvm_component;
+    `uvm_component_utils(uart_driver)
 
-    virtual gpio_if     gpio_if_;
+    virtual uart_if     uart_if_;
 
     string              name = "";
 
@@ -27,11 +27,12 @@ class gpio_monitor #(parameter string if_name = "") extends uvm_component;
     endfunction : new
 
     function void build_phase(uvm_phase phase);
-        if(!uvm_config_db #(virtual gpio_if)::get(null, "*",if_name, gpio_if_))
+        if(!uvm_config_db #(virtual uart_if)::get(null, "*",if_name, uart_if_))
             $fatal("Failed to get %s",if_name);
     endfunction : build_phase
 
     task run_phase(uvm_phase phase);
+        uart_if_.uart_rx = '1;
     endtask : run_phase
 
-endclass : gpio_monitor
+endclass : uart_driver
