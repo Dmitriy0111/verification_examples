@@ -41,7 +41,8 @@ class system_coverage #(parameter string if_name = "") extends uvm_component;
             bins    gpio_1_gpo_reg  = { GPIO_1_ADDR_S | GPIO_GPO_R };
             bins    gpio_1_gpd_reg  = { GPIO_1_ADDR_S | GPIO_GPD_R };
 
-            bins    pwm_0_cr        = { PWM_ADDR_S | PWM_C_R };
+            bins    pwm_0_c_reg     = { PWM_ADDR_S | PWM_C_R };
+
             option.weight = 0;
         }
 
@@ -60,7 +61,37 @@ class system_coverage #(parameter string if_name = "") extends uvm_component;
             bins    baud_38400      = binsof(uart_baudrate_cp) intersect {comp_l[2]} && binsof(system_addr_cp.uart_dr_reg);
             bins    baud_57600      = binsof(uart_baudrate_cp) intersect {comp_l[3]} && binsof(system_addr_cp.uart_dr_reg);
             bins    baud_115200     = binsof(uart_baudrate_cp) intersect {comp_l[4]} && binsof(system_addr_cp.uart_dr_reg);
-            ignore_bins others      = ! binsof(system_addr_cp.uart_dr_reg );                                                    // disable others cross bins
+            ignore_bins ib          = ! binsof(system_addr_cp.uart_dr_reg );                                                    // disable others cross bins
+        }
+
+        pwm_c_cp    : coverpoint s_if_.wd {
+            bins    others  [16]    = { [0 : 255] };
+            option.weight = 0;
+        }
+
+        pwm_c_cross : cross system_addr_cp, pwm_c_cp {
+            ignore_bins ib      = ! binsof(system_addr_cp.pwm_0_c_reg );        // disable others cross bins
+        }
+
+        gpio_cp     : coverpoint s_if_.wd {
+            bins    gpio_v  [8]     = { ['0 : 255] };
+            option.weight = 0;
+        }
+
+        gpo_0_cross : cross system_addr_cp, gpio_cp {
+            ignore_bins ib      = ! binsof(system_addr_cp.gpio_0_gpo_reg );     // disable others cross bins
+        }
+
+        gpd_0_cross : cross system_addr_cp, gpio_cp {
+            ignore_bins ib      = ! binsof(system_addr_cp.gpio_0_gpd_reg );     // disable others cross bins
+        }
+
+        gpo_1_cross : cross system_addr_cp, gpio_cp {
+            ignore_bins ib      = ! binsof(system_addr_cp.gpio_1_gpo_reg );     // disable others cross bins
+        }
+
+        gpd_1_cross : cross system_addr_cp, gpio_cp {
+            ignore_bins ib      = ! binsof(system_addr_cp.gpio_1_gpd_reg );     // disable others cross bins
         }
 
     endgroup : system_cg
@@ -81,11 +112,11 @@ class system_coverage #(parameter string if_name = "") extends uvm_component;
         phase.raise_objection(this);
 
         forever
-        fork
-            if( s_if_.req )
+        begin
+            @(posedge s_if_.req )
                 system_cg.sample();
-            @(posedge s_if_.clk);
-        join
+            @(posedge s_if_.req_ack);
+        end
 
         phase.drop_objection(this);
     endtask : run_phase

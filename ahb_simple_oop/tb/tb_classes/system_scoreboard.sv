@@ -45,7 +45,7 @@ class system_scoreboard extends uvm_component;
         fork : scb_fork
             rec_from_pwm_monitor();
             rec_from_uart_monitor();
-        join
+        join_any
 
     endtask : run_phase
 

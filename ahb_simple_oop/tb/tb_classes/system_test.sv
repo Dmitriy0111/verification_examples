@@ -31,6 +31,7 @@ class system_test extends uvm_test;
     uvm_tlm_fifo    #(logic [7  : 0])   uart_mon2scb_tlm;
     uvm_tlm_fifo    #(pwm_t         )   pwm_mon2scb_tlm;
     uvm_tlm_fifo    #(logic [15 : 0])   drv_simple2uart_mon_tlm;
+    uvm_tlm_fifo    #(logic [15 : 0])   drv_simple2uart_drv_tlm;
 
     function new( string name, uvm_component parent );
         super.new(name,parent);
@@ -41,6 +42,7 @@ class system_test extends uvm_test;
         uart_mon2scb_tlm        = new( "[ uart_mon2scb_tlm        ]" , this );
         pwm_mon2scb_tlm         = new( "[ pwm_mon2scb_tlm         ]" , this );
         drv_simple2uart_mon_tlm = new( "[ drv_simple2uart_mon_tlm ]" , this );
+        drv_simple2uart_drv_tlm = new( "[ drv_simple2uart_drv_tlm ]" , this );
         // UVM components
         c_r_generator_          = new( "[ CR     generator  ]" , this );
         system_driver_          = new( "[ SYSTEM driver     ]" , this );
@@ -58,11 +60,14 @@ class system_test extends uvm_test;
 
     function void connect_phase(uvm_phase phase);
         system_driver_      .drv_simple2uart_mon_port   .connect( drv_simple2uart_mon_tlm.put_export );
+        system_driver_      .drv_simple2uart_drv_port   .connect( drv_simple2uart_drv_tlm.put_export );
 
         pwm_monitor_        .pwm_mon2scb_port           .connect( pwm_mon2scb_tlm.put_export );
 
         uart_monitor_       .drv_simple2uart_mon_port   .connect( drv_simple2uart_mon_tlm.get_export );
         uart_monitor_       .uart_mon2scb_port          .connect( uart_mon2scb_tlm.put_export        );
+
+        uart_driver_        .drv_simple2uart_drv_port   .connect( drv_simple2uart_drv_tlm.get_export );
 
         system_scoreboard_  .uart_mon2scb_port          .connect( uart_mon2scb_tlm.get_export );
         system_scoreboard_  .pwm_mon2scb_port           .connect( pwm_mon2scb_tlm.get_export  );

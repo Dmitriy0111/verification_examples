@@ -25,4 +25,27 @@ interface ahb_if #(parameter if_n = 1);
     logic   [if_n-1 : 0][0  : 0]    hready;     // AHB HREADYOUT
     logic   [if_n-1 : 0][0  : 0]    hsel;       // AHB HSEL
 
+    // Properties
+    property haddr_unk_prop;    @(posedge hclk) disable iff( !hresetn ) ! $isunknown( haddr     );  endproperty : haddr_unk_prop
+    property hwdata_unk_prop;   @(posedge hclk) disable iff( !hresetn ) ! $isunknown( hwdata    );  endproperty : hwdata_unk_prop
+    property hrdata_unk_prop;   @(posedge hclk) disable iff( !hresetn ) ! $isunknown( hrdata    );  endproperty : hrdata_unk_prop
+    property hwrite_unk_prop;   @(posedge hclk) disable iff( !hresetn ) ! $isunknown( hwrite    );  endproperty : hwrite_unk_prop
+    property htrans_unk_prop;   @(posedge hclk) disable iff( !hresetn ) ! $isunknown( htrans    );  endproperty : htrans_unk_prop
+    property hsize_unk_prop;    @(posedge hclk) disable iff( !hresetn ) ! $isunknown( hsize     );  endproperty : hsize_unk_prop
+    property hburst_unk_prop;   @(posedge hclk) disable iff( !hresetn ) ! $isunknown( hburst    );  endproperty : hburst_unk_prop
+    property hresp_unk_prop;    @(posedge hclk) disable iff( !hresetn ) ! $isunknown( hresp     );  endproperty : hresp_unk_prop
+    property hready_unk_prop;   @(posedge hclk) disable iff( !hresetn ) ! $isunknown( hready    );  endproperty : hready_unk_prop
+    property hsel_unk_prop;     @(posedge hclk) disable iff( !hresetn ) ! $isunknown( hsel      );  endproperty : hsel_unk_prop
+    //Assertions
+    haddr_unk   : assert property( haddr_unk_prop   ) else $error( "Assert! haddr is unknown!"  );
+    hwdata_unk  : assert property( hwdata_unk_prop  ) else $error( "Assert! hwdata is unknown!" );
+    hrdata_unk  : assert property( hrdata_unk_prop  ) else $error( "Assert! hrdata is unknown!" );
+    hwrite_unk  : assert property( hwrite_unk_prop  ) else $error( "Assert! hwrite is unknown!" );
+    htrans_unk  : assert property( htrans_unk_prop  ) else $error( "Assert! htrans is unknown!" );
+    hsize_unk   : assert property( hsize_unk_prop   ) else $error( "Assert! hsize is unknown!"  );
+    hburst_unk  : assert property( hburst_unk_prop  ) else $error( "Assert! hburst is unknown!" );
+    hresp_unk   : assert property( hresp_unk_prop   ) else $error( "Assert! hresp is unknown!"  );
+    hready_unk  : assert property( hready_unk_prop  ) else $error( "Assert! hready is unknown!" );
+    hsel_unk    : assert property( hsel_unk_prop    ) else $error( "Assert! hsel is unknown!"   );
+
 endinterface : ahb_if
