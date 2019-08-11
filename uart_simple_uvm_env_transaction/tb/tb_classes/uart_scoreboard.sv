@@ -7,78 +7,78 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uart_pkg::*;
+`ifndef UART_SCOREBOARD__SV
+`define UART_SCOREBOARD__SV
+
+`uvm_analysis_imp_decl(_drv_rec)
+`uvm_analysis_imp_decl(_mon_rec)
 
 // class uart monitor
-class uart_scoreboard extends uvm_component;
+class uart_scoreboard extends uvm_scoreboard;
     `uvm_component_utils(uart_scoreboard)
 
-    uvm_get_port    #(uart_cd)  mon_port;
-    uvm_get_port    #(uart_cd)  gen_port;
+    uvm_analysis_imp_drv_rec    #(uart_cd, uart_scoreboard)     drv2scb_ap;
+    uvm_analysis_imp_mon_rec    #(uart_cd, uart_scoreboard)     mon2scb_ap;
 
     virtual uart_if             uart_if_;
-
-    string                      name = "";
 
     integer                     cycle = 0;
     integer                     rep_c = -1;
 
-    uart_cd                     uart_cd_from_generator[$];
+    uart_cd                     uart_cd_from_driver[$];
     uart_cd                     uart_cd_from_monitor[$];
 
-    function new (string name, uvm_component parent);
-        super.new(name, parent);
-        this.name = name;
-    endfunction : new
-
-    function void build_phase(uvm_phase phase);
-        if(!uvm_config_db #(virtual uart_if)::get(null, "*","uart_if_", uart_if_))
-            $fatal("Failed to get uart_if_");
-        mon_port = new("mon_port",this);
-        gen_port = new("gen_port",this);
-    endfunction : build_phase
-
-    task print_info( uart_cd uart_cd_ );
-        $display("[ Info  ] | %h | %s | Tx data    | 0x%h\n" , cycle , name , uart_cd_.tx_data);
-    endtask : print_info
-
-    task run_phase(uvm_phase phase);
-
-        forever
-        fork : scb_fork
-            rec_from_uart_generator();
-            rec_from_uart_monitor();
-            compare_data();
-        join
-
-    endtask : run_phase
-
-    task rec_from_uart_generator();
-        uart_cd uart_cd_0;
-        gen_port.get(uart_cd_0);
-        print_info(uart_cd_0);
-        uart_cd_from_generator.push_front(uart_cd_0);
-        
-    endtask : rec_from_uart_generator
-
-    task rec_from_uart_monitor();
-        uart_cd uart_cd_1;
-        mon_port.get(uart_cd_1);
-        print_info(uart_cd_1);
-        uart_cd_from_monitor.push_front(uart_cd_1);
-        
-    endtask : rec_from_uart_monitor
-
-    task compare_data();
-
-        @( ( uart_cd_from_monitor.size != 0 ) && ( uart_cd_from_generator.size != 0 ) );
-        cycle++;
-        if( uart_cd_from_monitor.pop_front().tx_data == uart_cd_from_generator.pop_front().tx_data )
-            $display("[ Info  ] | %h | %s | test pass\n" , cycle , name );
-        else
-            $display("[ Error ] | %h | %s | test fail\n" , cycle , name );
-        if( cycle == 20 )
-            $stop;
-    endtask : compare_data
+    extern function      new(string name, uvm_component parent);
+    extern function void build_phase(uvm_phase phase);
+    extern task          print_info( uart_cd uart_cd_ );
+    extern task          run_phase(uvm_phase phase);
+    extern task          compare_data();
+    extern function void write_drv_rec(uart_cd t);
+    extern function void write_mon_rec(uart_cd t);
 
 endclass : uart_scoreboard
+
+function uart_scoreboard::new(string name, uvm_component parent);
+    super.new(name, parent);
+    drv2scb_ap = new("drv2scb_ap", this);
+    mon2scb_ap = new("mon2scb_ap", this);
+endfunction : new
+
+function void uart_scoreboard::build_phase(uvm_phase phase);
+    if(!uvm_config_db #(virtual uart_if)::get(null, "*","uart_if_", uart_if_))
+        `uvm_fatal(this.get_name(), "Failed to get uart_if_")
+endfunction : build_phase
+
+task uart_scoreboard::print_info( uart_cd uart_cd_ );
+    `uvm_info(this.get_name(), $sformatf("| Cycle = 0x%h | Tx data = 0x%h |\n" , cycle , uart_cd_.tx_data), UVM_MEDIUM)
+endtask : print_info
+
+task uart_scoreboard::run_phase(uvm_phase phase);
+    forever
+        compare_data();
+
+endtask : run_phase
+
+task uart_scoreboard::compare_data();
+
+    @( ( uart_cd_from_monitor.size != 0 ) && ( uart_cd_from_driver.size != 0 ) );
+    cycle++;
+    if( uart_cd_from_monitor.pop_front().tx_data == uart_cd_from_driver.pop_front().tx_data )
+        `uvm_info(this.get_name(), $sformatf("| Test pass | cycle = 0x%h |", cycle), UVM_MEDIUM)
+    else
+        `uvm_info(this.get_name(), $sformatf("| Test fail | cycle = 0x%h |", cycle), UVM_MEDIUM)
+    if( cycle == 20 )
+        $stop;
+endtask : compare_data
+
+function void uart_scoreboard::write_drv_rec(uart_cd t);
+    print_info(t);
+    uart_cd_from_driver.push_front(t);
+endfunction : write_drv_rec
+
+function void uart_scoreboard::write_mon_rec(uart_cd t);
+    print_info(t);
+    uart_cd_from_monitor.push_front(t);
+endfunction : write_mon_rec
+
+`endif // UART_SCOREBOARD__SV

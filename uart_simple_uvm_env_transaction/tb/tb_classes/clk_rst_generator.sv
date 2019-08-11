@@ -7,8 +7,6 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uart_pkg::*;
-
 // class uart generator
 class clk_rst_generator extends uvm_component;
     `uvm_component_utils(clk_rst_generator)
@@ -24,7 +22,7 @@ class clk_rst_generator extends uvm_component;
 
     function void build_phase(uvm_phase phase);
         if(!uvm_config_db #(virtual uart_if)::get(null, "*","uart_if_", uart_if_))
-            $fatal("Failed to get uart_if_");
+            `uvm_fatal(this.get_name(), "Failed to get uart_if_")
     endfunction : build_phase
 
     task run_phase(uvm_phase phase);
