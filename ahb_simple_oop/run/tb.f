@@ -5,12 +5,3 @@
 ../tb/interfaces/pwm_if.sv
 ../tb/interfaces/simple_if.sv
 ../tb/ahb_tb.sv
-../tb/tb_classes/gpio_monitor.sv
-../tb/tb_classes/gpio_driver.sv
-../tb/tb_classes/uart_driver.sv
-../tb/tb_classes/uart_monitor.sv
-../tb/tb_classes/c_r_generator.sv
-../tb/tb_classes/system_driver.sv
-../tb/tb_classes/system_scoreboard.sv
-../tb/tb_classes/system_coverage.sv
-../tb/tb_classes/system_test.sv

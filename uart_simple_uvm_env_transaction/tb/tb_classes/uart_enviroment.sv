@@ -35,7 +35,7 @@ class uart_enviroment extends uvm_env;
 
 endclass : uart_enviroment
 
-function uart_enviroment::new (string name, uvm_component parent);
+function uart_enviroment::new(string name, uvm_component parent);
     super.new(name,parent);
 endfunction : new
 

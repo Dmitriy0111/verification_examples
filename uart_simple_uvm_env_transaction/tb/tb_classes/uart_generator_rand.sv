@@ -22,7 +22,7 @@ class uart_generator_rand extends uart_base_generator;
 
 endclass : uart_generator_rand
 
-function uart_generator_rand::new (string name, uvm_component parent);
+function uart_generator_rand::new(string name, uvm_component parent);
     super.new(name, parent);
 endfunction : new
 

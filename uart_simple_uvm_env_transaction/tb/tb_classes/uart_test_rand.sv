@@ -21,7 +21,7 @@ class uart_test_rand extends uvm_test;
 
 endclass : uart_test_rand
 
-function uart_test_rand::new (string name, uvm_component parent);
+function uart_test_rand::new(string name, uvm_component parent);
     super.new(name,parent);
 endfunction : new
 

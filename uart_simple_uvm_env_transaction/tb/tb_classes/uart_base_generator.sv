@@ -22,7 +22,7 @@ virtual class uart_base_generator extends uvm_component;
     uart_transactor             uart_transactor_;
     uart_cd                     uart_cd_;
 
-    function new (string name, uvm_component parent);
+    function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction : new
 

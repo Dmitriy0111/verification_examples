@@ -7,12 +7,8 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-`include "../../rtl/periphery/gpio/gpio.svh"
-
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-
-import test_pkg::*;
+`ifndef GPIO_DRIVER__SV
+`define GPIO_DRIVER__SV
 
 class gpio_driver #(parameter string if_name = "") extends uvm_component;
     `uvm_component_utils(gpio_driver)
@@ -21,7 +17,7 @@ class gpio_driver #(parameter string if_name = "") extends uvm_component;
 
     string              name = "";
 
-    function new (string name, uvm_component parent);
+    function new(string name, uvm_component parent);
         super.new(name, parent);
         this.name = name;
     endfunction : new
@@ -36,3 +32,5 @@ class gpio_driver #(parameter string if_name = "") extends uvm_component;
     endtask : run_phase
 
 endclass : gpio_driver
+
+`endif // GPIO_DRIVER__SV

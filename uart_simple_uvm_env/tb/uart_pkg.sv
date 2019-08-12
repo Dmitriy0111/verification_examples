@@ -112,16 +112,16 @@ import uvm_pkg::*;
         logic   [1  : 0]    stop_sel;
     } uart_cd;  // uart control/data
 
-`include "uart_base_generator.sv"
-`include "uart_generator_rand.sv"
-`include "uart_generator_direct.sv"
-`include "clk_rst_generator.sv"
-`include "uart_driver.sv"
-`include "uart_monitor.sv"
-`include "uart_scoreboard.sv"
-`include "uart_coverage.sv"
-`include "uart_enviroment.sv"
-`include "uart_test_rand.sv"
-`include "uart_test_direct.sv"
+`include "tb_classes/uart_base_generator.sv"
+`include "tb_classes/uart_generator_rand.sv"
+`include "tb_classes/uart_generator_direct.sv"
+`include "tb_classes/clk_rst_generator.sv"
+`include "tb_classes/uart_driver.sv"
+`include "tb_classes/uart_monitor.sv"
+`include "tb_classes/uart_scoreboard.sv"
+`include "tb_classes/uart_coverage.sv"
+`include "tb_classes/uart_enviroment.sv"
+`include "tb_classes/uart_test_rand.sv"
+`include "tb_classes/uart_test_direct.sv"
 
 endpackage : uart_pkg

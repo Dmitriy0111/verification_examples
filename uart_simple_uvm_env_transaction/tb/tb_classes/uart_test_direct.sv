@@ -21,7 +21,7 @@ class uart_test_direct extends uvm_test;
 
 endclass : uart_test_direct
 
-function uart_test_direct::new (string name, uvm_component parent);
+function uart_test_direct::new(string name, uvm_component parent);
     super.new(name,parent);
 endfunction : new
 

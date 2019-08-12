@@ -7,11 +7,8 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-
-import test_pkg::*;
-`include "../../rtl/periphery/pwm/pwm.svh"
+`ifndef PWM_MONITOR__SV
+`define PWM_MONITOR__SV
 
 class pwm_monitor #(parameter string if_name = "") extends uvm_component;
     `uvm_component_utils(pwm_monitor)
@@ -24,7 +21,7 @@ class pwm_monitor #(parameter string if_name = "") extends uvm_component;
     // current cycle variable
     integer                     cycle = 0;
     // class constructor
-    function new (string name, uvm_component parent);
+    function new(string name, uvm_component parent);
         super.new(name, parent);
         this.name = name;
     endfunction : new
@@ -57,3 +54,5 @@ class pwm_monitor #(parameter string if_name = "") extends uvm_component;
     endtask : run_phase
 
 endclass : pwm_monitor
+
+`endif // PWM_MONITOR__SV

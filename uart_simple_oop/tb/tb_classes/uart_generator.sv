@@ -7,8 +7,6 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uart_pkg::*;
-
 // class uart generator
 class uart_generator extends uart_btc;
 

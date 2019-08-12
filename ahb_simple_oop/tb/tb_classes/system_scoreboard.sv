@@ -7,12 +7,9 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uvm_pkg::*;
-`include "uvm_macros.svh"
+`ifndef SYSTEM_SCOREBOARD__SV
+`define SYSTEM_SCOREBOARD__SV
 
-import test_pkg::*;
-
-// class uart monitor
 class system_scoreboard extends uvm_component;
 
     `uvm_component_utils(system_scoreboard)
@@ -29,7 +26,7 @@ class system_scoreboard extends uvm_component;
     logic   [7  : 0]            uart_monitor_q[$];
     pwm_t                       pwm_monitor_q[$];
 
-    function new (string name, uvm_component parent);
+    function new(string name, uvm_component parent);
         super.new(name, parent);
         this.name = name;
     endfunction : new
@@ -64,3 +61,5 @@ class system_scoreboard extends uvm_component;
     endtask : rec_from_uart_monitor
 
 endclass : system_scoreboard
+
+`endif // SYSTEM_SCOREBOARD__SV

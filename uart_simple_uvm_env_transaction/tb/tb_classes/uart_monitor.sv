@@ -28,7 +28,7 @@ class uart_monitor extends uvm_monitor;
 
 endclass : uart_monitor
 
-function uart_monitor::new (string name, uvm_component parent);
+function uart_monitor::new(string name, uvm_component parent);
     super.new(name, parent);
     mon_ap = new("mon_ap", this);
 endfunction : new

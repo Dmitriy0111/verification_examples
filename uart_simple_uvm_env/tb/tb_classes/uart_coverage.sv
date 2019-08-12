@@ -7,9 +7,9 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uart_pkg::*;
+`ifndef UART_COVERAGE__SV
+`define UART_COVERAGE__SV
 
-// class uart generator
 class uart_coverage extends uvm_component;
     `uvm_component_utils(uart_coverage)
 
@@ -39,32 +39,39 @@ class uart_coverage extends uvm_component;
         cross stop_sel_cp , comp_cp;
     endgroup : uart_if_cg
 
-    function new (string name, uvm_component parent);
-        super.new(name, parent);
-        uart_if_cg = new();
-        this.name = name;
-    endfunction : new
-
-    function void build_phase(uvm_phase phase);
-        if(!uvm_config_db #(virtual uart_if)::get(null, "*","uart_if_", uart_if_))
-            $fatal("Failed to get uart_if_");
-    endfunction : build_phase
-
-    task run_phase(uvm_phase phase);
-        phase.raise_objection(this);
-        repeat(20)//forever
-        begin
-            @(posedge uart_if_.req_ack);
-            @(posedge uart_if_.clk);
-            cycle++;
-            uart_if_cg.sample();
-            print_info();
-        end
-        phase.drop_objection(this);
-    endtask : run_phase
-
-    task print_info();
-        $display("[ Info  ] | %h | %s | Coverage   | %2.2f%%"  , cycle , name , uart_if_cg.get_coverage() );
-    endtask : print_info
+    extern function      new(string name, uvm_component parent);
+    extern function void build_phase(uvm_phase phase);
+    extern task          run_phase(uvm_phase phase);
+    extern task          print_info();
 
 endclass : uart_coverage
+
+function uart_coverage::new(string name, uvm_component parent);
+    super.new(name, parent);
+    uart_if_cg = new();
+    this.name = name;
+endfunction : new
+
+function void uart_coverage::build_phase(uvm_phase phase);
+    if(!uvm_config_db #(virtual uart_if)::get(null, "*","uart_if_", uart_if_))
+        $fatal("Failed to get uart_if_");
+endfunction : build_phase
+
+task uart_coverage::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+    repeat(20)//forever
+    begin
+        @(posedge uart_if_.req_ack);
+        @(posedge uart_if_.clk);
+        cycle++;
+        uart_if_cg.sample();
+        print_info();
+    end
+    phase.drop_objection(this);
+endtask : run_phase
+
+task uart_coverage::print_info();
+    $display("[ Info  ] | %h | %s | Coverage   | %2.2f%%"  , cycle , name , uart_if_cg.get_coverage() );
+endtask : print_info
+
+`endif // UART_COVERAGE__SV

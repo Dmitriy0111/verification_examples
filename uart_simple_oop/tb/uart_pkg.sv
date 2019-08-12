@@ -137,10 +137,10 @@ package uart_pkg;
         logic   [1  : 0]    stop_sel;
     } uart_cd;  // uart control/data
 
-`include "uart_generator.sv"
-`include "uart_driver.sv"
-`include "uart_monitor.sv"
-`include "uart_scoreboard.sv"
-`include "uart_enviroment.sv"
+`include "tb_classes/uart_generator.sv"
+`include "tb_classes/uart_driver.sv"
+`include "tb_classes/uart_monitor.sv"
+`include "tb_classes/uart_scoreboard.sv"
+`include "tb_classes/uart_enviroment.sv"
 
 endpackage : uart_pkg

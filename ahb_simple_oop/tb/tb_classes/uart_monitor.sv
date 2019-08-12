@@ -7,12 +7,8 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-`include "../../rtl/periphery/uart/uart.svh"
-
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-
-import test_pkg::*;
+`ifndef UART_MONITOR__SV
+`define UART_MONITOR__SV
 
 class uart_monitor #(parameter string if_name = "") extends uvm_component;
     `uvm_component_utils(uart_monitor)
@@ -28,7 +24,7 @@ class uart_monitor #(parameter string if_name = "") extends uvm_component;
     // current cycle variable
     integer                             cycle = 0;
     // class constructor
-    function new (string name, uvm_component parent);
+    function new(string name, uvm_component parent);
         super.new(name, parent);
         this.name = name;
     endfunction : new
@@ -84,3 +80,5 @@ class uart_monitor #(parameter string if_name = "") extends uvm_component;
     endtask : run_phase
 
 endclass : uart_monitor
+
+`endif // UART_MONITOR__SV

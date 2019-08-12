@@ -14,15 +14,15 @@
 class uart_coverage extends uvm_subscriber #(uart_cd);
     `uvm_component_utils(uart_coverage)
 
-    string                      name = "";
+    string      name = "";
 
-    uart_cd                     uart_cd_cov;
+    uart_cd     uart_cd_cov;
 
-    integer                     cycle = 0;
-    integer                     rep_c = -1;
-    integer                     work_freq = 50000000;
+    integer     cycle = 0;
+    integer     rep_c = -1;
+    integer     work_freq = 50000000;
 
-    integer                     comp_l[5] = { work_freq/9600 , work_freq/19200 , work_freq/38400 , work_freq/57600 , work_freq/115200 };
+    integer     comp_l[5] = { work_freq/9600 , work_freq/19200 , work_freq/38400 , work_freq/57600 , work_freq/115200 };
 
     covergroup uart_cg with function sample();
         stop_sel_cp     : coverpoint uart_cd_cov.stop_sel
@@ -46,7 +46,7 @@ class uart_coverage extends uvm_subscriber #(uart_cd);
 
 endclass : uart_coverage
 
-function uart_coverage::new (string name, uvm_component parent);
+function uart_coverage::new(string name, uvm_component parent);
     super.new(name, parent);
     uart_cg = new();
 endfunction : new

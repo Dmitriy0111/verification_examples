@@ -7,13 +7,8 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-
-import test_pkg::*;
-
-`include "../../rtl/periphery/uart/uart.svh"
-`include "../rtl/system_settings.svh"
+`ifndef SYSTEM_DRIVER__SV
+`define SYSTEM_DRIVER__SV
 
 class system_driver #(parameter string if_name = "") extends uvm_component;
     `uvm_component_utils(system_driver)
@@ -29,7 +24,7 @@ class system_driver #(parameter string if_name = "") extends uvm_component;
     integer                     cycle = 0;
     integer                     rep_c = -1;
 
-    function new (string name, uvm_component parent);
+    function new(string name, uvm_component parent);
         super.new(name, parent);
         this.name = name;
     endfunction : new
@@ -165,3 +160,5 @@ class system_driver #(parameter string if_name = "") extends uvm_component;
     endtask : read_data
 
 endclass : system_driver
+
+`endif // SYSTEM_DRIVER__SV

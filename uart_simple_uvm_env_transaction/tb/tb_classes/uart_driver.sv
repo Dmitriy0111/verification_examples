@@ -23,14 +23,14 @@ class uart_driver extends uvm_component;
     integer                     cycle = 0;
     integer                     rep_c = -1;
 
-    extern function      new (string name, uvm_component parent);
+    extern function      new(string name, uvm_component parent);
     extern function void build_phase(uvm_phase phase);
     extern task          print_info( uart_cd uart_cd_ );
     extern task          run_phase(uvm_phase phase);
 
 endclass : uart_driver
 
-function uart_driver::new (string name, uvm_component parent);
+function uart_driver::new(string name, uvm_component parent);
     super.new(name, parent);
     drv_ap = new("drv_ap", this);
 endfunction : new

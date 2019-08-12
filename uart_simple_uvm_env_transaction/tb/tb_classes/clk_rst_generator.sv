@@ -7,7 +7,9 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-// class uart generator
+`ifndef CLK_RST_GENERATOR__SV
+`define CLK_RST_GENERATOR__SV
+
 class clk_rst_generator extends uvm_component;
     `uvm_component_utils(clk_rst_generator)
 
@@ -15,24 +17,30 @@ class clk_rst_generator extends uvm_component;
 
     string                      name = "";
 
-    function new (string name, uvm_component parent);
-        super.new(name, parent);
-        this.name = name;
-    endfunction : new
-
-    function void build_phase(uvm_phase phase);
-        if(!uvm_config_db #(virtual uart_if)::get(null, "*","uart_if_", uart_if_))
-            `uvm_fatal(this.get_name(), "Failed to get uart_if_")
-    endfunction : build_phase
-
-    task run_phase(uvm_phase phase);
-        phase.raise_objection(this);
-        $display("[ Info  ] | %h | %s | Starting clock and reset generation" , 0 , name);
-        fork : sim_fork
-            uart_if_.make_reset();
-            uart_if_.make_clock();
-        join
-        phase.drop_objection(this);
-    endtask : run_phase
+    extern function      new(string name, uvm_component parent);
+    extern function void build_phase(uvm_phase phase);
+    extern task          run_phase(uvm_phase phase);
 
 endclass : clk_rst_generator
+
+function clk_rst_generator::new(string name, uvm_component parent);
+    super.new(name, parent);
+    this.name = name;
+endfunction : new
+
+function void clk_rst_generator::build_phase(uvm_phase phase);
+    if(!uvm_config_db #(virtual uart_if)::get(null, "*","uart_if_", uart_if_))
+        `uvm_fatal(this.get_name(), "Failed to get uart_if_")
+endfunction : build_phase
+
+task clk_rst_generator::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+    $display("[ Info  ] | %h | %s | Starting clock and reset generation" , 0 , name);
+    fork : sim_fork
+        uart_if_.make_reset();
+        uart_if_.make_clock();
+    join
+    phase.drop_objection(this);
+endtask : run_phase
+
+`endif // CLK_RST_GENERATOR__SV

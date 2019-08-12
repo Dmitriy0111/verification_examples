@@ -7,10 +7,8 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-
-import test_pkg::*;
+`ifndef C_R_GENERATOR__SV
+`define C_R_GENERATOR__SV
 
 class c_r_generator #(parameter string if_name = "", parameter T = 0, resetn_delay = 0) extends uvm_component;
     `uvm_component_utils(c_r_generator)
@@ -19,7 +17,7 @@ class c_r_generator #(parameter string if_name = "", parameter T = 0, resetn_del
 
     string              name = "";
 
-    function new (string name, uvm_component parent);
+    function new(string name, uvm_component parent);
         super.new(name, parent);
         this.name = name;
     endfunction : new
@@ -53,3 +51,5 @@ class c_r_generator #(parameter string if_name = "", parameter T = 0, resetn_del
     endtask : run_phase
 
 endclass : c_r_generator
+
+`endif // C_R_GENERATOR__SV

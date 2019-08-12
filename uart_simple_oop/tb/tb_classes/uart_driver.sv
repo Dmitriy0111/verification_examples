@@ -7,8 +7,6 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uart_pkg::*;
-
 // class uart driver
 class uart_driver extends uart_btc;
 

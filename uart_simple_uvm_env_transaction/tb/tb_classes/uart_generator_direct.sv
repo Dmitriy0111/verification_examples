@@ -23,7 +23,7 @@ class uart_generator_direct extends uart_base_generator;
 
 endclass : uart_generator_direct
 
-function uart_generator_direct::new (string name, uvm_component parent);
+function uart_generator_direct::new(string name, uvm_component parent);
     super.new(name, parent);
 endfunction : new
 

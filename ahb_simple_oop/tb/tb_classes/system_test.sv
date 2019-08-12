@@ -7,10 +7,8 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-
-import test_pkg::*;
+`ifndef SYSTEM_TEST__SV
+`define SYSTEM_TEST__SV
 
 class system_test extends uvm_test;
     `uvm_component_utils(system_test);
@@ -74,3 +72,5 @@ class system_test extends uvm_test;
     endfunction : connect_phase
 
 endclass : system_test
+
+`endif // SYSTEM_TEST__SV

@@ -7,13 +7,8 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-
-`include "../rtl/system_settings.svh"
-`include "../rtl/periphery/uart/uart.svh"
-
-import test_pkg::*;
+`ifndef SYSTEM_COVERAGE__SV
+`define SYSTEM_COVERAGE__SV
 
 class system_coverage #(parameter string if_name = "") extends uvm_component;
     `uvm_component_utils(system_coverage)
@@ -96,7 +91,7 @@ class system_coverage #(parameter string if_name = "") extends uvm_component;
 
     endgroup : system_cg
 
-    function new (string name, uvm_component parent);
+    function new(string name, uvm_component parent);
         super.new(name, parent);
         this.name = name;
         system_cg = new();
@@ -122,3 +117,5 @@ class system_coverage #(parameter string if_name = "") extends uvm_component;
     endtask : run_phase
 
 endclass : system_coverage
+
+`endif // SYSTEM_COVERAGE__SV

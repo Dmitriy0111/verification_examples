@@ -9,8 +9,13 @@
 
 package test_pkg;
 
-import uvm_pkg::*;
-`include "uvm_macros.svh"
+    import uvm_pkg::*;
+    `include "uvm_macros.svh"
+
+    `include "../rtl/system_settings.svh"
+    `include "../rtl/periphery/uart/uart.svh"
+    `include "../rtl/periphery/gpio/gpio.svh"
+    `include "../rtl/periphery/pwm/pwm.svh"
 
     typedef struct 
     {

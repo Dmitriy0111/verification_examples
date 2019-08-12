@@ -7,12 +7,8 @@
 *  Copyright(c)    :   2019 Vlasov D.V.
 */
 
-`include "../../rtl/periphery/gpio/gpio.svh"
-
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-
-import test_pkg::*;
+`ifndef UART_DRIVER__SV
+`define UART_DRIVER__SV
 
 class uart_driver #(parameter string if_name = "") extends uvm_component;
     `uvm_component_utils(uart_driver)
@@ -25,7 +21,7 @@ class uart_driver #(parameter string if_name = "") extends uvm_component;
 
     integer             cycle = 0;
 
-    function new (string name, uvm_component parent);
+    function new(string name, uvm_component parent);
         super.new(name, parent);
         this.name = name;
     endfunction : new
@@ -67,3 +63,5 @@ class uart_driver #(parameter string if_name = "") extends uvm_component;
     endtask : send_uart_symbol
 
 endclass : uart_driver
+
+`endif // UART_DRIVER__SV
