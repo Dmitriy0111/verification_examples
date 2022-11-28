@@ -35,12 +35,13 @@ package test_pkg;
 
         virtual function void build_phase(uvm_phase phase);
             super.build_phase(phase);
-            HistErrFD = $fopen( { HistErrFN , ".log" }, "w");
 
             err_inj = base_err_injector::type_id::create("err_inj", this);
 
             $value$plusargs("REP_CNT=%d", RepCnt);
             $value$plusargs("ERR_NUM=%d", err_num);
+
+            HistErrFD = $fopen( $sformatf("%s_%0d_%0d.log", HistErrFN, RepCnt, err_num), "w");
         endfunction : build_phase
 
         virtual task run_phase(uvm_phase phase);
@@ -66,7 +67,7 @@ package test_pkg;
             foreach(HistErr[ii,jj]) begin
                 ErrAverage += $itor(HistErr[ii][jj]);
             end
-            ErrAverage = ErrAverage / $itor(ArrLen*DW);
+            ErrAverage = ErrAverage / $itor(DW*ArrLen);
             `uvm_info("INFO", $sformatf("ErrAverage = %f", ErrAverage), UVM_LOW)
 
             begin
@@ -78,7 +79,7 @@ package test_pkg;
                 end
             end
             `uvm_info("INFO", $sformatf("ErrRMS = %f", ErrRMS), UVM_HIGH)
-            ErrRMS = ErrRMS / $pow($itor(ArrLen*DW), 0.5);
+            ErrRMS = ErrRMS / $pow($itor(RepCnt*err_num), 0.5);
             `uvm_info("INFO", $sformatf("ErrRMS = %f", ErrRMS), UVM_LOW)
 
             foreach(HistErr[ii,jj]) begin
